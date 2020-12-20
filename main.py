@@ -115,14 +115,26 @@ main_window = sg.Window("Warsztat Samochodowy Python", main_window_layout, size=
 while running:
     main_window_event, main_window_values = main_window.read()
     print("Main window event invoked: " + main_window_event)
+
     if main_window_event == sg.WIN_CLOSED or main_window_event == EXIT_EVENT:
         break
+
+    if main_window_event == REMOVE_CLIENT_EVENT:
+        print("Remove client: " + str(main_window_values[CLIENTS_LIST_FIELD]))
+
+        # Listbox values are returned as array so there is a need to take first element from array
+        removed_client = main_window_values[CLIENTS_LIST_FIELD][0] if len(main_window_values[CLIENTS_LIST_FIELD]) > 0 \
+            else None
+
+        if removed_client is not None:
+            clients_array.remove(removed_client)
+            main_window[CLIENTS_LIST_FIELD].update(clients_array)
 
     if not client_window_active and main_window_event == ADD_CLIENT_EVENT:
         main_window.hide()
         client_window_active = True
 
-        # to prevent from layout "re-usage" exception
+        # if added to prevent from layout "re-usage" exception
         if client_window is None:
             client_window = sg.Window("Warsztat Samochodowy Python - Dodaj klienta", add_client_window_layout,
                                       size=(500, 400))
