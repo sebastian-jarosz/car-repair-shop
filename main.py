@@ -63,7 +63,7 @@ client_window_active = False
 client_window = None
 
 
-def client_window_function():
+def add_client_window_func():
     global client_window_active
     global client_window
 
@@ -131,7 +131,7 @@ while running:
             client_window.un_hide()
 
         while client_window_active:
-            client_window_function()
+            add_client_window_func()
 
 print("App closed")
 main_window.close()
