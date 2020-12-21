@@ -5,7 +5,6 @@ clients_array = []
 cars_array = []
 invoices_array = []
 
-
 # Init example data
 c1 = Client("Klaudia", "W", 666)
 c2 = Client("Sebastian", "J", 878)
@@ -43,7 +42,7 @@ CLIENTS_LIST_FIELD = '-clientsList-'
 MAKE_FIELD = '-make-'
 MODEL_FIELD = '-model-'
 REG_NUMBER_FIELD = '-regNumber-'
-OWNER_FIELD = '-regNumber-'
+OWNER_FIELD = '-owner-'
 CARS_LIST_FIELD = '-carsList-'
 
 # Layouts
@@ -75,32 +74,32 @@ add_client_window_layout = [[sg.Text("Imię "), sg.InputText(key=FIRST_NAME_FIEL
 add_car_window_layout = [[sg.Text("Marka "), sg.InputText(key=MAKE_FIELD)],
                          [sg.Text("Model "), sg.InputText(key=MODEL_FIELD)],
                          [sg.Text("Nr Rej. "), sg.InputText(key=REG_NUMBER_FIELD)],
-                         [sg.Text("Właściciel "), sg.Combo(values=clients_array, key=OWNER_FIELD)],
+                         [sg.Text("Właściciel "), sg.Combo(values=clients_array, readonly=True, key=OWNER_FIELD)],
                          [sg.ReadButton("Zapisz", key=SAVE_CAR_EVENT), sg.ReadButton("Anuluj", key=CANCEL_CAR_EVENT)]]
 
 running = True
 client_window_active = False
 client_window = None
-
+car_window_active = False
+car_window = None
 
 main_window = sg.Window("Warsztat Samochodowy Python", main_window_layout, size=(1000, 400))
 
 
-# Functions
+# Functions - Client
 def add_client_window_func():
     global client_window_active
     global client_window
 
     client_window_event, client_window_values = client_window.read()
-    print("Client window event invoked: " + client_window_event)
+    print("Client window event invoked: " + str(client_window_event))
 
     if client_window_event == SAVE_CLIENT_EVENT:
-        print(client_window_values)
         is_client_data_valid = validate_client_window(client_window_values)
-        print("is valid: " + str(is_client_data_valid))
 
         if is_client_data_valid:
-            new_client = Client(client_window_values[FIRST_NAME_FIELD], client_window_values[LAST_NAME_FIELD],
+            new_client = Client(client_window_values[FIRST_NAME_FIELD],
+                                client_window_values[LAST_NAME_FIELD],
                                 client_window_values[PHONE_NUMBER_FIELD])
 
             clients_array.append(new_client)
@@ -110,7 +109,7 @@ def add_client_window_func():
             main_window[CLIENTS_LIST_FIELD].update(clients_array)
             main_window.UnHide()
         else:
-            sg.Popup("All client fields must be fulfilled", non_blocking=True)
+            sg.Popup("Wszystkie dane klienta muszą być uzupełnione", non_blocking=True)
 
     if client_window_event == CANCEL_CLIENT_EVENT or client_window_event == sg.WIN_CLOSED:
         client_window_active = False
@@ -146,6 +145,58 @@ def remove_client():
         main_window[CLIENTS_LIST_FIELD].update(clients_array)
 
 
+def add_car_window_func():
+    global car_window_active
+    global car_window
+
+    car_window_event, car_window_values = car_window.read()
+    print("Car window event invoked: " + str(car_window_event))
+
+    if car_window_event == SAVE_CAR_EVENT:
+        is_car_data_valid = validate_car_window(car_window_values)
+
+        if is_car_data_valid:
+            new_car = Car(car_window_values[MAKE_FIELD],
+                          car_window_values[MODEL_FIELD],
+                          car_window_values[REG_NUMBER_FIELD],
+                          # check cause - sg returning "" when value is not selected in Combo
+                          car_window_values[OWNER_FIELD] if car_window_values[OWNER_FIELD] else None)
+
+            cars_array.append(new_car)
+            car_window_active = False
+            car_window.hide()
+
+            main_window[CARS_LIST_FIELD].update(cars_array)
+            # Clients list also needs to be updated to show proper values
+            main_window[CLIENTS_LIST_FIELD].update(clients_array)
+            main_window.UnHide()
+        else:
+            sg.Popup("Wszystkie dane samochodu, poza właścicielem, muszą być uzupełnione", non_blocking=True)
+
+    if car_window_event == CANCEL_CLIENT_EVENT or car_window_event == sg.WINDOW_CLOSED:
+        car_window_active = False
+        car_window.hide()
+        main_window.UnHide()
+
+
+def clear_car_window_fields():
+    global car_window
+
+    car_window[MAKE_FIELD].update("")
+    car_window[MODEL_FIELD].update("")
+    car_window[REG_NUMBER_FIELD].update("")
+    car_window[OWNER_FIELD].update("")
+    car_window[OWNER_FIELD].update(values=clients_array)
+
+
+def validate_car_window(client_window_values):
+    make = client_window_values[MAKE_FIELD]
+    model = client_window_values[MODEL_FIELD]
+    reg_number = client_window_values[REG_NUMBER_FIELD]
+
+    return bool(make and model and reg_number)
+
+
 def remove_car():
     print("Remove car: " + str(main_window_values[CARS_LIST_FIELD]))
 
@@ -156,11 +207,14 @@ def remove_car():
     if removed_car is not None:
         cars_array.remove(removed_car)
         main_window[CARS_LIST_FIELD].update(cars_array)
+        if removed_car.owner is not None:
+            removed_car.owner.remove_car(removed_car)
+            main_window[CLIENTS_LIST_FIELD].update(clients_array)
 
 
 while running:
     main_window_event, main_window_values = main_window.read()
-    print("Main window event invoked: " + main_window_event)
+    print("Main window event invoked: " + str(main_window_event))
 
     if main_window_event == sg.WIN_CLOSED or main_window_event == EXIT_EVENT:
         break
@@ -185,10 +239,25 @@ while running:
         while client_window_active:
             add_client_window_func()
 
-    # Remove client - main window
+    # Remove car - main window
     if main_window_event == REMOVE_CAR_EVENT:
         remove_car()
 
+    # Add car - separate window
+    if not car_window_active and main_window_event == ADD_CAR_EVENT:
+        main_window.hide()
+        car_window_active = True
 
-print("App closed")
+        # if added to prevent from layout "re-usage" exception
+        if car_window is None:
+            car_window = sg.Window("Warsztat Samochodowy Python - Dodaj samochód", add_car_window_layout,
+                                   size=(500, 400))
+        else:
+            clear_car_window_fields()
+            car_window.un_hide()
+
+        while car_window_active:
+            add_car_window_func()
+
+print("Warsztat Samochodowy Python - Application closed")
 main_window.close()

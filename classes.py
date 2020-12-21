@@ -7,17 +7,25 @@ class Client:
         self.last_name = last_name
         self.phone_number = phone_number
         self.cars = []
-        self.cars.append(car) if car is not None else None
+        if car is not None:
+            self.cars.append(car)
 
     def __repr__(self):
-        return "Imię: " + self.first_name + " " + \
-               "Nazwisko: " + self.last_name + " " + \
-               "Nr.Tel.: " + str(self.phone_number) + " " + \
-               "Ilość samochodów: " + str(len(self.cars))
+        return "IMIĘ: " + self.first_name + " " + \
+               "NAZWISKO: " + self.last_name + " " + \
+               "NR.TEL.: " + str(self.phone_number) + " " + \
+               "ILOŚĆ SAMOCHODÓW: " + str(len(self.cars))
 
     def add_car(self, car):
-        self.cars.append(car)
-        car.add_owner(self)
+        if car is not None:
+            self.cars.append(car)
+
+    def remove_car(self, car):
+        if car is not None:
+            self.cars.remove(car)
+
+    def get_name(self):
+        return self.first_name + " " + self.last_name
 
 
 class Car:
@@ -25,15 +33,15 @@ class Car:
         self.make = make
         self.model = model
         self.reg_number = reg_number
-        self.owner = owner if owner is not None else None
+        self.owner = owner
+        if owner is not None:
+            owner.add_car(self)
 
     def __repr__(self):
-        return "Marka: " + self.make + " " + \
-               "Model: " + self.model + " " + \
-               "Nr.Rej.: " + self.reg_number
-
-    def add_owner(self, owner):
-        self.owner = owner
+        return "MARKA: " + self.make + " " + \
+               "MODEL: " + self.model + " " + \
+               "NR.REJ.: " + self.reg_number + \
+               ((" WŁAŚCICIEL: " + str(self.owner.get_name())) if self.owner is not None else "")
 
 
 class Invoice:
