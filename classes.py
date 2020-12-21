@@ -21,11 +21,11 @@ class Client:
 
 
 class Car:
-    def __init__(self, make, model, reg_number):
+    def __init__(self, make, model, reg_number, owner=None):
         self.make = make
         self.model = model
         self.reg_number = reg_number
-        self.owner = None
+        self.owner = owner if owner is not None else None
 
     def __repr__(self):
         return "Marka: " + self.make + " " + \

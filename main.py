@@ -11,6 +11,10 @@ c1 = Client("Klaudia", "W", 666)
 c2 = Client("Sebastian", "J", 878)
 clients_array.append(c1)
 clients_array.append(c2)
+car1 = Car("Chevy", "Cruze", "WA1234")
+car2 = Car("Opel", "Astra", "WY1234")
+cars_array.append(car1)
+cars_array.append(car2)
 i1 = Invoice(c1, 100)
 i2 = Invoice(c2, 69, True)
 invoices_array.append(i1)
@@ -23,8 +27,12 @@ SAVE_CLIENT_EVENT = "-saveClient-"
 CANCEL_CLIENT_EVENT = "-cancelClient-"
 ADD_CAR_EVENT = "-addCar-"
 REMOVE_CAR_EVENT = "-removeCar-"
+SAVE_CAR_EVENT = "-saveCar-"
+CANCEL_CAR_EVENT = "-cancelCar-"
 ADD_INVOICE_EVENT = "-addInvoice-"
 REMOVE_INVOICE_EVENT = "-removeInvoice-"
+SAVE_INVOICE_EVENT = "-saveInvoice-"
+CANCEL_INVOICE_EVENT = "-cancelInvoice-"
 EXIT_EVENT = '-exit-'
 
 # Fields keys
@@ -32,6 +40,11 @@ FIRST_NAME_FIELD = '-firstName-'
 LAST_NAME_FIELD = '-lastName-'
 PHONE_NUMBER_FIELD = '-phoneNumber-'
 CLIENTS_LIST_FIELD = '-clientsList-'
+MAKE_FIELD = '-make-'
+MODEL_FIELD = '-model-'
+REG_NUMBER_FIELD = '-regNumber-'
+OWNER_FIELD = '-regNumber-'
+CARS_LIST_FIELD = '-carsList-'
 
 # Layouts
 clients_tab = [[sg.Text("PANEL KLIENTÓW")],
@@ -40,7 +53,7 @@ clients_tab = [[sg.Text("PANEL KLIENTÓW")],
                 sg.ReadButton("Usuń klienta", key=REMOVE_CLIENT_EVENT)]]
 
 cars_tab = [[sg.Text("PANEL SAMOCHODÓW")],
-            [sg.Listbox(values=cars_array, size=(800, 20))],
+            [sg.Listbox(values=cars_array, size=(800, 20), key=CARS_LIST_FIELD)],
             [sg.ReadButton("Dodaj samochód", key=ADD_CAR_EVENT), sg.ReadButton("Usuń samochód", key=REMOVE_CAR_EVENT)]]
 
 invoices_tab = [[sg.Text("PANEL FAKTUR")],
@@ -56,7 +69,14 @@ main_window_layout = [[sg.TabGroup([[sg.Tab("Klienci", clients_tab)],
 add_client_window_layout = [[sg.Text("Imię "), sg.InputText(key=FIRST_NAME_FIELD)],
                             [sg.Text("Nazwisko "), sg.InputText(key=LAST_NAME_FIELD)],
                             [sg.Text("Numer Telefonu "), sg.InputText(key=PHONE_NUMBER_FIELD)],
-                            [sg.ReadButton("Zapisz", key=SAVE_CLIENT_EVENT), sg.ReadButton("Anuluj", key=CANCEL_CLIENT_EVENT)]]
+                            [sg.ReadButton("Zapisz", key=SAVE_CLIENT_EVENT),
+                             sg.ReadButton("Anuluj", key=CANCEL_CLIENT_EVENT)]]
+
+add_car_window_layout = [[sg.Text("Marka "), sg.InputText(key=MAKE_FIELD)],
+                         [sg.Text("Model "), sg.InputText(key=MODEL_FIELD)],
+                         [sg.Text("Nr Rej. "), sg.InputText(key=REG_NUMBER_FIELD)],
+                         [sg.Text("Właściciel "), sg.Combo(values=clients_array, key=OWNER_FIELD)],
+                         [sg.ReadButton("Zapisz", key=SAVE_CAR_EVENT), sg.ReadButton("Anuluj", key=CANCEL_CAR_EVENT)]]
 
 running = True
 client_window_active = False
@@ -126,6 +146,18 @@ def remove_client():
         main_window[CLIENTS_LIST_FIELD].update(clients_array)
 
 
+def remove_car():
+    print("Remove car: " + str(main_window_values[CARS_LIST_FIELD]))
+
+    # Listbox values are returned as array so there is a need to take first element from array
+    removed_car = main_window_values[CARS_LIST_FIELD][0] \
+        if len(main_window_values[CARS_LIST_FIELD]) > 0 else None
+
+    if removed_car is not None:
+        cars_array.remove(removed_car)
+        main_window[CARS_LIST_FIELD].update(cars_array)
+
+
 while running:
     main_window_event, main_window_values = main_window.read()
     print("Main window event invoked: " + main_window_event)
@@ -152,6 +184,10 @@ while running:
 
         while client_window_active:
             add_client_window_func()
+
+    # Remove client - main window
+    if main_window_event == REMOVE_CAR_EVENT:
+        remove_car()
 
 
 print("App closed")
