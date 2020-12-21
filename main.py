@@ -5,15 +5,14 @@ clients_array = []
 cars_array = []
 invoices_array = []
 
-c1 = Client("Klaudia", "Wawoczny", 666)
-c2 = Client("Sebastian", "Jarosz", 878)
 
+# Init example data
+c1 = Client("Klaudia", "W", 666)
+c2 = Client("Sebastian", "J", 878)
 clients_array.append(c1)
 clients_array.append(c2)
-
 i1 = Invoice(c1, 100)
 i2 = Invoice(c2, 69, True)
-
 invoices_array.append(i1)
 invoices_array.append(i2)
 
@@ -34,6 +33,7 @@ LAST_NAME_FIELD = '-lastName-'
 PHONE_NUMBER_FIELD = '-phoneNumber-'
 CLIENTS_LIST_FIELD = '-clientsList-'
 
+# Layouts
 clients_tab = [[sg.Text("PANEL KLIENTÓW")],
                [sg.Listbox(values=clients_array, size=(800, 20), key=CLIENTS_LIST_FIELD)],
                [sg.ReadButton("Dodaj klienta", key=ADD_CLIENT_EVENT),
@@ -63,6 +63,10 @@ client_window_active = False
 client_window = None
 
 
+main_window = sg.Window("Warsztat Samochodowy Python", main_window_layout, size=(1000, 400))
+
+
+# Functions
 def add_client_window_func():
     global client_window_active
     global client_window
@@ -110,7 +114,17 @@ def validate_client_window(client_window_values):
     return bool(first_name and last_name and phone_number)
 
 
-main_window = sg.Window("Warsztat Samochodowy Python", main_window_layout, size=(1000, 400))
+def remove_client():
+    print("Remove client: " + str(main_window_values[CLIENTS_LIST_FIELD]))
+
+    # Listbox values are returned as array so there is a need to take first element from array
+    removed_client = main_window_values[CLIENTS_LIST_FIELD][0] \
+        if len(main_window_values[CLIENTS_LIST_FIELD]) > 0 else None
+
+    if removed_client is not None:
+        clients_array.remove(removed_client)
+        main_window[CLIENTS_LIST_FIELD].update(clients_array)
+
 
 while running:
     main_window_event, main_window_values = main_window.read()
@@ -119,17 +133,11 @@ while running:
     if main_window_event == sg.WIN_CLOSED or main_window_event == EXIT_EVENT:
         break
 
+    # Remove client - main window
     if main_window_event == REMOVE_CLIENT_EVENT:
-        print("Remove client: " + str(main_window_values[CLIENTS_LIST_FIELD]))
+        remove_client()
 
-        # Listbox values are returned as array so there is a need to take first element from array
-        removed_client = main_window_values[CLIENTS_LIST_FIELD][0] if len(main_window_values[CLIENTS_LIST_FIELD]) > 0 \
-            else None
-
-        if removed_client is not None:
-            clients_array.remove(removed_client)
-            main_window[CLIENTS_LIST_FIELD].update(clients_array)
-
+    # Add client - separate window
     if not client_window_active and main_window_event == ADD_CLIENT_EVENT:
         main_window.hide()
         client_window_active = True
@@ -144,6 +152,7 @@ while running:
 
         while client_window_active:
             add_client_window_func()
+
 
 print("App closed")
 main_window.close()
