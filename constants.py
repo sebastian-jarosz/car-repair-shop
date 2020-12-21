@@ -1,0 +1,25 @@
+# Event names
+ADD_CLIENT_EVENT = "-addClient-"
+REMOVE_CLIENT_EVENT = "-removeClient-"
+SAVE_CLIENT_EVENT = "-saveClient-"
+CANCEL_CLIENT_EVENT = "-cancelClient-"
+ADD_CAR_EVENT = "-addCar-"
+REMOVE_CAR_EVENT = "-removeCar-"
+SAVE_CAR_EVENT = "-saveCar-"
+CANCEL_CAR_EVENT = "-cancelCar-"
+ADD_INVOICE_EVENT = "-addInvoice-"
+REMOVE_INVOICE_EVENT = "-removeInvoice-"
+SAVE_INVOICE_EVENT = "-saveInvoice-"
+CANCEL_INVOICE_EVENT = "-cancelInvoice-"
+EXIT_EVENT = '-exit-'
+
+# Fields keys
+FIRST_NAME_FIELD = '-firstName-'
+LAST_NAME_FIELD = '-lastName-'
+PHONE_NUMBER_FIELD = '-phoneNumber-'
+CLIENTS_LIST_FIELD = '-clientsList-'
+MAKE_FIELD = '-make-'
+MODEL_FIELD = '-model-'
+REG_NUMBER_FIELD = '-regNumber-'
+OWNER_FIELD = '-owner-'
+CARS_LIST_FIELD = '-carsList-'
