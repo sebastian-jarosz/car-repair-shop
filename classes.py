@@ -58,8 +58,8 @@ class Invoice:
             self.is_paid = False
 
     def __repr__(self):
-        return "Numer faktury: " + self.number + " " + \
-               "Klient: " + str(self.client) + " " + \
-               "Kwota: " + str(self.amount) + " " + \
-               "Opłacona: " + str(self.is_paid)
+        return "NUMER FAKTURY: " + self.number + " " + \
+               "KLIENT: " + str(self.client.get_name()) + " " + \
+               "KWOTA: " + str(self.amount) + " " + \
+               "OPŁACONA: " + ("Tak" if self.is_paid else "Nie")
 

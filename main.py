@@ -31,7 +31,7 @@ cars_tab = [[sg.Text("PANEL SAMOCHODÓW")],
             [sg.ReadButton("Dodaj samochód", key=ADD_CAR_EVENT), sg.ReadButton("Usuń samochód", key=REMOVE_CAR_EVENT)]]
 
 invoices_tab = [[sg.Text("PANEL FAKTUR")],
-                [sg.Listbox(values=invoices_array, size=(800, 20))],
+                [sg.Listbox(values=invoices_array, size=(800, 20), key=INVOICES_LIST_FIELD)],
                 [sg.ReadButton("Dodaj fakturę", key=ADD_INVOICE_EVENT),
                  sg.ReadButton("Usuń fakturę", key=REMOVE_INVOICE_EVENT)]]
 
@@ -52,11 +52,19 @@ add_car_window_layout = [[sg.Text("Marka "), sg.InputText(key=MAKE_FIELD)],
                          [sg.Text("Właściciel "), sg.Combo(values=clients_array, readonly=True, key=OWNER_FIELD)],
                          [sg.ReadButton("Zapisz", key=SAVE_CAR_EVENT), sg.ReadButton("Anuluj", key=CANCEL_CAR_EVENT)]]
 
+add_invoice_window_layout = [[sg.Text("Klient "), sg.Combo(values=clients_array, readonly=True, key=CLIENT_FIELD)],
+                             [sg.Text("Kwota "), sg.InputText(key=AMOUNT_FIELD)],
+                             [sg.Checkbox("Opłacono? ", key=IS_PAID_FIELD)],
+                             [sg.ReadButton("Zapisz", key=SAVE_INVOICE_EVENT),
+                              sg.ReadButton("Anuluj", key=CANCEL_INVOICE_EVENT)]]
+
 running = True
 client_window_active = False
 client_window = None
 car_window_active = False
 car_window = None
+invoice_window_active = False
+invoice_window = None
 
 main_window = sg.Window("Warsztat Samochodowy Python", main_window_layout, size=(1000, 400))
 
@@ -189,6 +197,64 @@ def remove_car():
             main_window[CLIENTS_LIST_FIELD].update(clients_array)
 
 
+def add_invoice_window_func():
+    global invoice_window_active
+    global invoice_window
+
+    invoice_window_event, invoice_window_values = invoice_window.read()
+    print("Invoice window event invoked: " + str(invoice_window_event))
+
+    if invoice_window_event == SAVE_INVOICE_EVENT:
+        is_invoice_data_valid = validate_invoice_window(invoice_window_values)
+
+        if is_invoice_data_valid:
+            new_invoice = Invoice(invoice_window_values[CLIENT_FIELD], invoice_window_values[AMOUNT_FIELD],
+                                  invoice_window_values[IS_PAID_FIELD])
+
+            invoices_array.append(new_invoice)
+            invoice_window_active = False
+            invoice_window.hide()
+
+            main_window[INVOICES_LIST_FIELD].update(invoices_array)
+            main_window.UnHide()
+        else:
+            sg.Popup("Wszystkie dane dla nowej faktury muszą być uzupełnione", non_blocking=True)
+
+    if invoice_window_event == CANCEL_INVOICE_EVENT or invoice_window_event == sg.WINDOW_CLOSED:
+        invoice_window_active = False
+        invoice_window.hide()
+        main_window.UnHide()
+
+
+def clear_invoice_window_fields():
+    global invoice_window
+
+    invoice_window[CLIENT_FIELD].update("")
+    invoice_window[CLIENT_FIELD].update(values=clients_array)
+    invoice_window[AMOUNT_FIELD].update("")
+    invoice_window[IS_PAID_FIELD].update("")
+
+
+def validate_invoice_window(invoice_window_values):
+    client = invoice_window_values[CLIENT_FIELD]
+    amount = invoice_window_values[AMOUNT_FIELD]
+    is_paid = invoice_window_values[CLIENT_FIELD]
+
+    return bool(client and amount and is_paid)
+
+
+def remove_invoice():
+    print("Remove car: " + str(main_window_values[INVOICES_LIST_FIELD]))
+
+    # Listbox values are returned as array so there is a need to take first element from array
+    removed_invoice = main_window_values[INVOICES_LIST_FIELD][0] \
+        if len(main_window_values[INVOICES_LIST_FIELD]) > 0 else None
+
+    if removed_invoice is not None:
+        invoices_array.remove(removed_invoice)
+        main_window[INVOICES_LIST_FIELD].update(invoices_array)
+
+
 while running:
     main_window_event, main_window_values = main_window.read()
     print("Main window event invoked: " + str(main_window_event))
@@ -235,6 +301,26 @@ while running:
 
         while car_window_active:
             add_car_window_func()
+
+    # Remove invoice - main window
+    if main_window_event == REMOVE_INVOICE_EVENT:
+        remove_invoice()
+
+    # Add invoice - separate window
+    if not invoice_window_active and main_window_event == ADD_INVOICE_EVENT:
+        main_window.hide()
+        invoice_window_active = True
+
+        # if added to prevent from layout "re-usage" exception
+        if invoice_window is None:
+            invoice_window = sg.Window("Warsztat Samochodowy Python - Dodaj fakturę", add_invoice_window_layout,
+                                       size=(500, 400))
+        else:
+            clear_invoice_window_fields()
+            invoice_window.un_hide()
+
+        while invoice_window_active:
+            add_invoice_window_func()
 
 print("Warsztat Samochodowy Python - Application closed")
 main_window.close()
