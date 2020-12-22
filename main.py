@@ -146,7 +146,7 @@ def add_car_window_func():
             main_window[CLIENTS_LIST_FIELD].update(clients_array)
             main_window.UnHide()
         else:
-            sg.Popup("Wszystkie dane samochodu, poza właścicielem, muszą być uzupełnione", non_blocking=True)
+            sg.Popup("Wszystkie dane samochodu muszą być uzupełnione", non_blocking=True)
 
     if car_window_event == CANCEL_CLIENT_EVENT or car_window_event == sg.WINDOW_CLOSED:
         car_window_active = False
@@ -164,12 +164,13 @@ def clear_car_window_fields():
     car_window[OWNER_FIELD].update(values=clients_array)
 
 
-def validate_car_window(client_window_values):
-    make = client_window_values[MAKE_FIELD]
-    model = client_window_values[MODEL_FIELD]
-    reg_number = client_window_values[REG_NUMBER_FIELD]
+def validate_car_window(car_window_values):
+    make = car_window_values[MAKE_FIELD]
+    model = car_window_values[MODEL_FIELD]
+    reg_number = car_window_values[REG_NUMBER_FIELD]
+    owner = car_window_values[OWNER_FIELD]
 
-    return bool(make and model and reg_number)
+    return bool(make and model and reg_number and owner)
 
 
 def remove_car():
