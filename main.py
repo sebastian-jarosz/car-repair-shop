@@ -33,7 +33,8 @@ cars_tab = [[sg.Text("PANEL SAMOCHODÓW")],
 invoices_tab = [[sg.Text("PANEL FAKTUR")],
                 [sg.Listbox(values=invoices_array, size=(800, 20), key=INVOICES_LIST_FIELD)],
                 [sg.ReadButton("Dodaj fakturę", key=ADD_INVOICE_EVENT),
-                 sg.ReadButton("Usuń fakturę", key=REMOVE_INVOICE_EVENT)]]
+                 sg.ReadButton("Usuń fakturę", key=REMOVE_INVOICE_EVENT),
+                 sg.ReadButton("Zmień status płatności", key=CHANGE_PAYMENT_STATUS_INVOICE_EVENT)]]
 
 main_window_layout = [[sg.TabGroup([[sg.Tab("Klienci", clients_tab)],
                                     [sg.Tab("Samochody", cars_tab)],
@@ -244,7 +245,7 @@ def validate_invoice_window(invoice_window_values):
 
 
 def remove_invoice():
-    print("Remove car: " + str(main_window_values[INVOICES_LIST_FIELD]))
+    print("Remove invoice: " + str(main_window_values[INVOICES_LIST_FIELD]))
 
     # Listbox values are returned as array so there is a need to take first element from array
     removed_invoice = main_window_values[INVOICES_LIST_FIELD][0] \
@@ -252,6 +253,17 @@ def remove_invoice():
 
     if removed_invoice is not None:
         invoices_array.remove(removed_invoice)
+        main_window[INVOICES_LIST_FIELD].update(invoices_array)
+
+
+def change_payment_status():
+    print("Change payment status of invoice: " + str(main_window_values[INVOICES_LIST_FIELD]))
+    # Listbox values are returned as array so there is a need to take first element from array
+    changed_invoice = main_window_values[INVOICES_LIST_FIELD][0] \
+        if len(main_window_values[INVOICES_LIST_FIELD]) > 0 else None
+
+    if changed_invoice is not None:
+        changed_invoice.change_payment_status()
         main_window[INVOICES_LIST_FIELD].update(invoices_array)
 
 
@@ -321,6 +333,10 @@ while running:
 
         while invoice_window_active:
             add_invoice_window_func()
+
+    # Change payment status of invoice - main window
+    if main_window_event == CHANGE_PAYMENT_STATUS_INVOICE_EVENT:
+        change_payment_status()
 
 print("Warsztat Samochodowy Python - Application closed")
 main_window.close()

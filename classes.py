@@ -63,3 +63,6 @@ class Invoice:
                "KWOTA: " + str(self.amount) + " " + \
                "OPŁACONA: " + ("Tak" if self.is_paid else "Nie")
 
+    def change_payment_status(self):
+        self.is_paid = not self.is_paid
+

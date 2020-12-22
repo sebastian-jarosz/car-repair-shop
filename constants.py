@@ -9,6 +9,7 @@ SAVE_CAR_EVENT = "-saveCar-"
 CANCEL_CAR_EVENT = "-cancelCar-"
 ADD_INVOICE_EVENT = "-addInvoice-"
 REMOVE_INVOICE_EVENT = "-removeInvoice-"
+CHANGE_PAYMENT_STATUS_INVOICE_EVENT = "-changePaymentStatusInvoice-"
 SAVE_INVOICE_EVENT = "-saveInvoice-"
 CANCEL_INVOICE_EVENT = "-cancelInvoice-"
 EXIT_EVENT = '-exit-'
